@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>倍倍</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #f0f7ff 0%, #e9eef5 100%);
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Helvetica, sans-serif;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .converter-card {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .header {
+            background: #1a2c3e;
+            padding: 24px 24px 20px 24px;
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0 0 6px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            margin: 0;
+            opacity: 0.8;
+            font-size: 0.85rem;
+        }
+
+        .dropzone {
+            margin: 20px 20px 0 20px;
+            background: #f8fafd;
+            border: 2px dashed #b9cad9;
+            border-radius: 32px;
+            padding: 28px 16px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .dropzone.drag-over {
+            background: #e6f0ff;
+            border-color: #2c7da0;
+            transform: scale(0.99);
+        }
+
+        .dropzone-icon {
+            font-size: 44px;
+            margin-bottom: 12px;
+        }
+
+        .dropzone-text {
+            font-weight: 500;
+            color: #2c5a6e;
+            margin-bottom: 10px;
+        }
+
+        .dropzone-sub {
+            font-size: 0.75rem;
+            color: #6c7e8f;
+        }
+
+        .file-select-btn {
+            background: #2c7da0;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .file-select-btn:active {
+            background: #1f5e7a;
+        }
+
+        .audio-info {
+            background: #ffffffdd;
+            margin: 18px 20px 0 20px;
+            padding: 12px 16px;
+            border-radius: 28px;
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .audio-info.hidden {
+            display: none;
+        }
+
+        .file-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1e2f3a;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 180px;
+        }
+
+        .duration-badge {
+            background: #eef2f7;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-family: monospace;
+            color: #2c5a6e;
+        }
+
+        .speed-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin: 20px 20px 12px 20px;
+        }
+
+        .speed-btn {
+            flex: 1;
+            background: #eef2f9;
+            border: none;
+            padding: 12px 0;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2c5a6e;
+            transition: all 0.2s;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .speed-btn.active {
+            background: #2c7da0;
+            color: white;
+            box-shadow: 0 6px 12px -8px rgba(44,125,160,0.4);
+        }
+
+        .play-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 10px 20px 16px 20px;
+        }
+
+        .ctrl-btn {
+            background: white;
+            border: 1px solid #cbdde9;
+            border-radius: 60px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.1s linear;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.96);
+            background: #f4f9ff;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin: 12px 20px 28px 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            background: #f3f6fc;
+            border: 1px solid #cddae5;
+            border-radius: 50px;
+            padding: 12px 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #1f3b48;
+        }
+
+        .action-btn.primary {
+            background: #2c7da0;
+            border-color: #2c7da0;
+            color: white;
+            box-shadow: 0 4px 8px rgba(44,125,160,0.2);
+        }
+
+        .action-btn.primary:active {
+            background: #1e6380;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #1e2f3cee;
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        .toast-msg.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            visibility: hidden;
+            -webkit-backdrop-filter: blur(3px);
+            backdrop-filter: blur(3px);
+        }
+
+        .loading-overlay.visible {
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            background: white;
+            padding: 24px 32px;
+            border-radius: 48px;
+            display: flex;
+            gap: 12px;
+            font-weight: 600;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 550px) {
+            body {
+                padding: 12px;
+            }
+            .ctrl-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .action-btn {
+                font-size: 0.8rem;
+            }
+            .speed-btn {
+                font-size: 1rem;
+            }
+            .file-name {
+                max-width: 140px;
+            }
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #8c9aa8;
+            margin: 10px 0 18px;
+        }
+
+        button {
+            background: none;
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+
+<div class="converter-card">
+    <div class="header">
+        <h1>倍倍 v1.4</h1>
+        <p>created by 超级无敌小南梁</p>
+    </div>
+
+    <div class="dropzone" id="dropzone">
+        <div class="dropzone-icon">📂</div>
+        <div class="dropzone-text">点一下 或者 拖进来</div>
+        <div class="dropzone-sub">这玩意老牛逼了</div>
+        <button class="file-select-btn" id="fileSelectBtn">上传</button>
+        <input type="file" id="fileInput" accept="audio/*" style="display: none;">
+    </div>
+
+    <div class="audio-info hidden" id="audioInfoArea">
+        <span class="file-name" id="fileName">-</span>
+        <span class="duration-badge" id="durationDisplay">0:00</span>
+    </div>
+
+    <div class="speed-buttons">
+        <button class="speed-btn" data-rate="1.0">😄1.0x</button>
+        <button class="speed-btn" data-rate="1.5">😨1.5x</button>
+        <button class="speed-btn" data-rate="2.0">😡2.0x</button>
+    </div>
+
+    <div class="play-controls">
+        <button class="ctrl-btn" id="playBtn">播放</button>
+        <button class="ctrl-btn" id="stopBtn">停止</button>
+    </div>
+
+    <div class="action-buttons">
+        <button class="action-btn" id="exportBtn">导出到本地</button>
+        <button class="action-btn primary" id="shareBtn">分你一个梨</button>
+    </div>
+    <footer>其实我也不知道这里要写啥</footer>
+</div>
+
+<div id="loadingToast" class="loading-overlay">
+    <div class="loading-spinner">等一会……</div>
+</div>
+<div id="messageToast" class="toast-msg"></div>
+
+<script>
+    (function(){
+        // DOM 元素
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileSelectBtn = document.getElementById('fileSelectBtn');
+        const audioInfoArea = document.getElementById('audioInfoArea');
+        const fileNameSpan = document.getElementById('fileName');
+        const durationSpan = document.getElementById('durationDisplay');
+        const speedBtns = document.querySelectorAll('.speed-btn');
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        const loadingOverlay = document.getElementById('loadingToast');
+        const toastMsgDiv = document.getElementById('messageToast');
+
+        // 全局变量
+        let audioContext = null;
+        let originalBuffer = null;
+        let currentRate = 1.0;
+        let currentSource = null;
+        let currentFileName = "未命名音频";
+        let currentFileType = "audio/mpeg";
+
+        // 显示Toast
+        function showMessage(msg, duration = 2500) {
+            toastMsgDiv.textContent = msg;
+            toastMsgDiv.classList.add('show');
+            setTimeout(() => {
+                toastMsgDiv.classList.remove('show');
+            }, duration);
+        }
+
+        function showLoading(show) {
+            if (show) {
+                loadingOverlay.classList.add('visible');
+            } else {
+                loadingOverlay.classList.remove('visible');
+            }
+        }
+
+        function initAudioContext() {
+            if (audioContext) return audioContext;
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                return audioContext;
+            } catch(e) {
+                console.error(e);
+                showMessage("您的浏览器太废物了👎");
+                return null;
+            }
+        }
+
+        async function resumeAudioContext() {
+            if (audioContext && audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+        }
+
+        function stopCurrentPlayback() {
+            if (currentSource) {
+                try {
+                    currentSource.stop();
+                } catch(e) {}
+                currentSource = null;
+            }
+        }
+
+        async function playPreview() {
+            if (!originalBuffer) {
+                showMessage("没有音频");
+                return;
+            }
+            await resumeAudioContext();
+            if (!audioContext) return;
+            stopCurrentPlayback();
+            const source = audioContext.createBufferSource();
+            source.buffer = originalBuffer;
+            source.playbackRate.value = currentRate;
+            source.connect(audioContext.destination);
+            source.start();
+            currentSource = source;
+            source.onended = () => {
+                if (currentSource === source) currentSource = null;
+            };
+            showMessage(`${currentRate}x`);
+        }
+
+        function stopPreview() {
+            if (!originalBuffer) {
+                showMessage("没有音频");
+                return;
+            }
+            stopCurrentPlayback();
+            showMessage("已停止");
+        }
+
+        function formatDuration(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2,'0')}`;
+        }
+
+        async function loadAudioFile(file) {
+            if (!file) return;
+            stopCurrentPlayback();
+            currentFileName = file.name || "audio";
+            fileNameSpan.textContent = currentFileName.length > 30 ? currentFileName.slice(0,27)+"..." : currentFileName;
+            currentFileType = file.type || "audio/mpeg";
+            showLoading(true);
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const ctx = initAudioContext();
+                if (!ctx) throw new Error("？给我气笑了");
+                const decoded = await ctx.decodeAudioData(arrayBuffer);
+                originalBuffer = decoded;
+                const durationSec = decoded.duration;
+                durationSpan.textContent = formatDuration(durationSec);
+                audioInfoArea.classList.remove('hidden');
+                showMessage(`OK: ${currentFileName}  共 ${formatDuration(durationSec)}`);
+                const activeSpeed = document.querySelector('.speed-btn.active');
+                if (activeSpeed) {
+                    currentRate = parseFloat(activeSpeed.getAttribute('data-rate'));
+                } else {
+                    document.querySelector('.speed-btn[data-rate="1.0"]').classList.add('active');
+                    currentRate = 1.0;
+                }
+            } catch (err) {
+                console.error(err);
+                showMessage("这啥玩意儿啊我不认识");
+                audioInfoArea.classList.add('hidden');
+                originalBuffer = null;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 重采样变速
+        function resampleAudioBuffer(sourceBuffer, rate) {
+            if (!sourceBuffer) throw new Error("滚木");
+            if (rate <= 0) rate = 1.0;
+            const numberOfChannels = sourceBuffer.numberOfChannels;
+            const originalSampleRate = sourceBuffer.sampleRate;
+            const originalLength = sourceBuffer.length;
+            const newLength = Math.max(1, Math.floor(originalLength / rate));
+            const newBuffer = new AudioBuffer({
+                numberOfChannels: numberOfChannels,
+                length: newLength,
+                sampleRate: originalSampleRate
+            });
+            for (let ch = 0; ch < numberOfChannels; ch++) {
+                const channelData = sourceBuffer.getChannelData(ch);
+                const newChannelData = newBuffer.getChannelData(ch);
+                for (let i = 0; i < newLength; i++) {
+                    const srcPos = i * rate;
+                    const srcIdx = Math.floor(srcPos);
+                    const frac = srcPos - srcIdx;
+                    if (srcIdx + 1 < originalLength) {
+                        const s1 = channelData[srcIdx];
+                        const s2 = channelData[srcIdx + 1];
+                        newChannelData[i] = s1 + (s2 - s1) * frac;
+                    } else if (srcIdx < originalLength) {
+                        newChannelData[i] = channelData[srcIdx];
+                    } else {
+                        newChannelData[i] = 0;
+                    }
+                }
+            }
+            return newBuffer;
+        }
+
+        function audioBufferToWav(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1;
+            const bitDepth = 16;
+            let samples = buffer.length;
+            let dataLength = samples * numChannels * (bitDepth / 8);
+            const bufferLength = 44 + dataLength;
+            const arrayBuffer = new ArrayBuffer(bufferLength);
+            const view = new DataView(arrayBuffer);
+            function writeString(offset, str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+            }
+            writeString(0, 'RIFF');
+            view.setUint32(4, bufferLength - 8, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, format, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            const byteRate = sampleRate * numChannels * (bitDepth / 8);
+            view.setUint32(28, byteRate, true);
+            const blockAlign = numChannels * (bitDepth / 8);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(36, 'data');
+            view.setUint32(40, dataLength, true);
+            let offset = 44;
+            for (let i = 0; i < samples; i++) {
+                for (let ch = 0; ch < numChannels; ch++) {
+                    const sample = buffer.getChannelData(ch)[i];
+                    const intSample = Math.max(-1, Math.min(1, sample)) * 0x7FFF;
+                    view.setInt16(offset, intSample, true);
+                    offset += 2;
+                }
+            }
+            return new Blob([arrayBuffer], { type: 'audio/wav' });
+        }
+
+        async function exportSpeedAudio(saveOrShare = 'download') {
+            if (!originalBuffer) {
+                showMessage("没有音频");
+                return null;
+            }
+            showLoading(true);
+            try {
+                const rate = currentRate;
+                let wavBlob;
+                if (rate === 1.0) {
+                    wavBlob = audioBufferToWav(originalBuffer);
+                } else {
+                    const resampled = resampleAudioBuffer(originalBuffer, rate);
+                    wavBlob = audioBufferToWav(resampled);
+                }
+                const baseFileName = currentFileName.replace(/\.[^/.]+$/, '') || 'audio';
+                const exportFileName = `${baseFileName}_${rate}x.wav`;
+                if (saveOrShare === 'download') {
+                    const downloadLink = document.createElement('a');
+                    const url = URL.createObjectURL(wavBlob);
+                    downloadLink.href = url;
+                    downloadLink.download = exportFileName;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    URL.revokeObjectURL(url);
+                    showMessage(`已导出 ${rate}x 音频`);
+                }
+                return { blob: wavBlob, fileName: exportFileName };
+            } catch (err) {
+                console.error(err);
+                showMessage("导出失败了");
+                return null;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function shareAudioFile() {
+            if (!originalBuffer) {
+                showMessage("请先导入音频");
+                return;
+            }
+            if (!navigator.share || !navigator.canShare) {
+                showMessage("你的浏览器太废物了👎", 2000);
+                await exportSpeedAudio('download');
+                return;
+            }
+            showLoading(true);
+            try {
+                const rate = currentRate;
+                let shareBlob;
+                let finalFileName;
+                if (rate === 1.0) {
+                    shareBlob = audioBufferToWav(originalBuffer);
+                    finalFileName = `${currentFileName.replace(/\.[^/.]+$/, '')}_原速.wav`;
+                } else {
+                    const resampled = resampleAudioBuffer(originalBuffer, rate);
+                    shareBlob = audioBufferToWav(resampled);
+                    finalFileName = `${currentFileName.replace(/\.[^/.]+$/, '')}_${rate}x.wav`;
+                }
+                const fileObj = new File([shareBlob], finalFileName, { type: 'audio/wav' });
+                if (navigator.canShare && navigator.canShare({ files: [fileObj] })) {
+                    await navigator.share({
+                        title: '变速音频',
+                        text: `${currentFileName}  ${rate}x 音频`,
+                        files: [fileObj]
+                    });
+                    showMessage("OK");
+                } else {
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(shareBlob);
+                    link.href = url;
+                    link.download = finalFileName;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    showMessage("OKKK");
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error(err);
+                    showMessage("没分享成，甩你本地了");
+                    await exportSpeedAudio('download');
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 拖拽与文件选择
+        function setupDragAndDrop() {
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('drag-over');
+            });
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('drag-over');
+            });
+            dropzone.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.includes('audio')) {
+                    await loadAudioFile(files[0]);
+                } else {
+                    showMessage("拉进来……");
+                }
+            });
+            dropzone.addEventListener('click', (e) => {
+                if (e.target === fileSelectBtn || e.target.closest('.file-select-btn')) return;
+                fileInput.click();
+            });
+            fileSelectBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileInput.click();
+            });
+            fileInput.addEventListener('change', async (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    await loadAudioFile(e.target.files[0]);
+                }
+                fileInput.value = '';
+            });
+        }
+
+        function bindSpeedButtons() {
+            speedBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const rate = parseFloat(btn.getAttribute('data-rate'));
+                    currentRate = rate;
+                    speedBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    showMessage(`速度切换为 ${rate}x ，下次播放/导出生效`);
+                    stopCurrentPlayback();
+                });
+            });
+        }
+
+        async function unlockAudioOnFirstTouch() {
+            const resumeCtx = async () => {
+                if (audioContext && audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                    showMessage("OK");
+                }
+                document.removeEventListener('touchstart', resumeCtx);
+                document.removeEventListener('click', resumeCtx);
+            };
+            document.addEventListener('touchstart', resumeCtx, { once: true });
+            document.addEventListener('click', resumeCtx, { once: true });
+        }
+
+        function init() {
+            initAudioContext();
+            bindSpeedButtons();
+            setupDragAndDrop();
+            playBtn.addEventListener('click', playPreview);
+            stopBtn.addEventListener('click', stopPreview);
+            exportBtn.addEventListener('click', () => exportSpeedAudio('download'));
+            shareBtn.addEventListener('click', shareAudioFile);
+            unlockAudioOnFirstTouch();
+            document.querySelector('.speed-btn[data-rate="1.0"]').classList.add('active');
+            currentRate = 1.0;
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
